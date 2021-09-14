@@ -30,3 +30,12 @@ Features:
 - Floor Buttons with UP and DOWN option, to optimize path in order to save time and energy.
     
 ![Version 3 Image](elevator_v03.png)
+
+### Version 4
+TinkerCAD Link to Project: [Link](https://www.tinkercad.com/things/8ur879CvKcL-copy-of-elevatorv3/editel?sharecode=-RLiIx0KWXIGxxufw1LyrDR8_vbAUv3IMULZoG3NfYQ)
+
+Features:
+- Fire emergency drill, to bring the elevator on Ground Floor and Open Doors.
+- Once the temperature is restored, all the operations resumes.
+    
+![Version 4 Image](elevator_v04.png)
