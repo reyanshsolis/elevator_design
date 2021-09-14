@@ -23,3 +23,10 @@ Features:
 
 ![Version 2 Image](elevator_v02.png)
 
+### Version 3
+TinkerCAD Link to Project: [Link](https://www.tinkercad.com/things/aPMHKM4js9v-copy-of-elevatorv2/editel?sharecode=SOgrBGqQWdce7G66YkaGlmh03rJTUlOpN3F38QLBj-0)
+
+Features:
+- Floor Buttons with UP and DOWN option, to optimize path in order to save time and energy.
+    
+![Version 3 Image](elevator_v03.png)
