@@ -31,8 +31,8 @@ Features:
     
 ![Version 3 Image](elevator_v03.png)
 
-### Version 4
-TinkerCAD Link to Project: [Link](https://www.tinkercad.com/things/8ur879CvKcL-copy-of-elevatorv3/editel?sharecode=-RLiIx0KWXIGxxufw1LyrDR8_vbAUv3IMULZoG3NfYQ)
+### Version 4 [Final Version]
+TinkerCAD Link to Project: [Link](https://www.tinkercad.com/things/7HOf9jK94Jy)
 
 Features:
 - Fire emergency drill, to bring the elevator on Ground Floor and Open Doors.

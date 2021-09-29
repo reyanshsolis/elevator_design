@@ -7,18 +7,20 @@
 
 // ----------------- CONFIGURATION ---------------------
 
-// Initialize the library with the numbers of the interface pins
+// Initialize the LCD library with the numbers of the interface pins.
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
 // Set the total num of floors.
 #define TOTAL_FLOORS 4
 
 // Initialize pins for buttons.
+// PINs for floor buttons for requesting to go UP.
 const int FloorRequestUpPin[TOTAL_FLOORS - 1] = {6, 7, 8};
+// PINs for floor buttons for requesting to go DOWN.
 const int FloorRequestDownPin[TOTAL_FLOORS - 1] = {9, 10, 13};
+// PINs for lift buttons for requesting to go to floor.
 const int LiftRequestPin[TOTAL_FLOORS] = {A0, A1, A2, A3};
-
-const int DoorEmergencyPin = 9;
+// PIN for temperature sensor analog input.
 const int FirePin = A4;
 
 // Assumed time delays.
@@ -26,6 +28,10 @@ const int FirePin = A4;
 const int delay_floor_to_floor = 2000;
 // Delay to wait on a floor with Door Open.
 const int delay_wait_on_floor = 5000;
+
+// Configured Temperature to Analog Value from 0 to 1024.
+#define upper_temp 512
+#define lower_temp 220
 
 // --------------------------------------------------------
 
@@ -83,10 +89,9 @@ void setup()
     lcd.print("Initiating Program");
     delay(50);
 
-    pinMode(DoorEmergencyPin, INPUT);
     pinMode(FirePin, INPUT);
 
-    // Initialize request array.
+    // Initialize request arrays.
     for (int i = 0; i < TOTAL_FLOORS; ++i)
     {
         pinMode(LiftRequestPin[i], INPUT);
@@ -151,6 +156,7 @@ void loop()
     delay(100);
 }
 
+/// \brief Formats and Display data on LCD.
 void LCDPrintInfo(const int current_floor,
                   const int dir_state,
                   const int door_state,
@@ -185,6 +191,11 @@ void LCDPrintInfo(const int current_floor,
     }
 }
 
+/// \brief Function to Check Fire Emergency.
+/// If emergency is detected, the lift goes to the
+/// ground/lowest floor and opens the door.
+/// The door remains opened, untill the temperature
+/// falls back to room temperature.
 void CheckFireEmergency()
 {
     if (DEBUG)
@@ -193,40 +204,47 @@ void CheckFireEmergency()
         Serial.print(analogRead(FirePin));
         Serial.println(" ");
     }
-    while (analogRead(FirePin) > 512)
+    if (analogRead(FirePin) > upper_temp)
     {
-        while (current_floor_)
+        while (analogRead(FirePin) > lower_temp)
         {
+            while (current_floor_)
+            {
+                lcd.clear();
+                lcd.setCursor(0, 0);
+                lcd.print("FIRE EMERGENCY");
+                lcd.setCursor(0, 1);
+                lcd.print(current_floor_);
+                lcd.print(" ");
+                lcd.print(" GOING DOWN");
+
+                dir_state = DOWN;
+                door_state = GATE_CLOSE;
+                delay(delay_floor_to_floor);
+                current_floor_ = current_floor_ - 1;
+            }
+
             lcd.clear();
             lcd.setCursor(0, 0);
             lcd.print("FIRE EMERGENCY");
             lcd.setCursor(0, 1);
             lcd.print(current_floor_);
             lcd.print(" ");
-            lcd.print(" GOING DOWN");
+            lcd.print(" DOOR OPEN");
 
-            dir_state = DOWN;
-            door_state = GATE_CLOSE;
-            delay(delay_floor_to_floor);
-            current_floor_ = current_floor_ - 1;
+            dir_state = STOP;
+            door_state = GATE_OPEN;
+            delay(1000);
         }
 
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("FIRE EMERGENCY");
-        lcd.setCursor(0, 1);
-        lcd.print(current_floor_);
-        lcd.print(" ");
-        lcd.print(" DOOR OPEN");
-
-        dir_state = STOP;
-        door_state = GATE_OPEN;
-        delay(1000);
+        door_state = GATE_CLOSE;
     }
-
-    door_state = GATE_CLOSE;
 }
 
+/// \brief Updates `current_floor`, based upon time passed,
+/// since last known floor. The tiemr is set to 0, upon reaching
+/// a floor, and after `delay_floor_to_floor` time, the
+/// `current_floor` is updated in the direction of travel.
 void UpdateCurrentFloor()
 {
     if (millis() - time_last_floor_ > delay_floor_to_floor)
@@ -245,6 +263,10 @@ void UpdateCurrentFloor()
     }
 }
 
+/// \brief Checks if the target floor is reached.
+/// If reached, the request arrays are updates, by resetting
+/// the requests from that floor. Doors are opened for the
+/// configured time.
 void CheckTargetAndStopIfReached(const int target_floor)
 {
     if (target_floor != -1)
@@ -521,6 +543,8 @@ int GetFirstElementInRequestArrayInDirection(bool *request_array,
 
 int abs_(const int x) { return (x > 0 ? x : -x); }
 
+/// \brief Computes the next target for the lift, based on requests and
+/// directions.
 void GetNextTargetInDirection(bool *request_array,
                               int &current_floor,
                               int &dir_state,
